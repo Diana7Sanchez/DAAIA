@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="es">
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>DAAIA Dashboard</title>
+
+  <!-- Dependencias -->
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      margin:0;
+      padding:20px;
+      background:#f4f4f4;
+    }
+
+.header{
+  margin-bottom:30px;
+  background:white;
+  padding:20px 30px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+   .title-section{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  width:100%;
+}
+
+.title-text{
+  flex:1;
+}
+
+.logo{
+  width:260px;
+  height:auto;
+  object-fit:contain;
+}
+
+    h1{
+      color:#7b1e2b;
+      margin:0;
+    }
+
+    h2{
+      margin-top:5px;
+      font-weight:normal;
+      color:#555;
+      font-size:18px;
+    }
+
+    .filters{
+      display:flex;
+      gap:10px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    select{
+      padding:10px;
+      border-radius:5px;
+      border:1px solid #ccc;
+      background:white;
+    }
+    .pdf-btn{
+
+  background:#7b1e2b;
+  color:white;
+  border:none;
+  padding:10px 18px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+  transition:.2s;
+}
+
+.pdf-btn:hover{
+
+  background:#5e1621;
+}
+
+    .cards{
+      display:grid;
+      grid-template-columns:
+        repeat(auto-fit,minmax(220px,1fr));
+
+      gap:20px;
+      margin-bottom:20px;
+    }
+
+    .card{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      box-shadow:0 2px 8px rgba(0,0,0,.1);
+    }
+
+    .card h3{
+      margin-top:0;
+      color:#555;
+      font-size:16px;
+    }
+
+    .card p{
+      font-size:32px;
+      margin:0;
+      font-weight:bold;
+    }
+
+    .charts{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+      margin-bottom:20px;
+    }
+
+  .chart-box{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.1);
+  height:320px;
+  position:relative;
+  overflow:hidden;
+}
+
+    .table-container{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      box-shadow:0 2px 8px rgba(0,0,0,.1);
+      overflow-x:auto;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th, td{
+      padding:12px;
+      border-bottom:1px solid #ddd;
+      text-align:left;
+      font-size:14px;
+    }
+
+    thead{
+      background:#7b1e2b;
+      color:white;
+    }
+
+    tr:hover{
+      background:#f9f9f9;
+    }
+
+    @media(max-width:1000px){
+
+      .charts{
+        grid-template-columns:1fr;
+      }
+    }
+
+ @media(max-width:900px){
+
+  body{
+    padding:10px;
+  }
+
+  .title-section{
+    flex-direction:column-reverse;
+    align-items:flex-start;
+  }
+
+.logo{
+  width:180px;
+}
+
+  .cards{
+    grid-template-columns:1fr;
+  }
+
+  .charts{
+    grid-template-columns:1fr;
+  }
+
+  .chart-box{
+    height:280px;
+  }
+
+  h1{
+    font-size:28px;
+  }
+
+  h2{
+    font-size:15px;
+  }
+
+  table{
+    font-size:12px;
+  }
+
+  th, td{
+    padding:8px;
+  }
+}
+
+  </style>
+
+</head>
+
+<body>
+
+<header class="header">
+
+  <div class="title-section">
+
+    <div class="title-text">
+
+      <h1>DAAIA</h1>
+
+      <h2>
+        Dirección de Análisis de Accidentes
+        e Incidentes de Aviación
+      </h2>
+
+    </div>
+
+    <img
+      src="logo_sict.png"
+      alt="Logo"
+      class="logo"
+    >
+
+  </div>
+
+</header>
+
+<section class="filters">
+
+  <div class="filter-group">
+
+    <select id="yearFilter">
+
+      <option value="">
+        Todos los años
+      </option>
+
+    </select>
+
+    <select id="categoryFilter">
+
+      <option value="">
+        Todas las categorías
+      </option>
+
+    </select>
+
+  </div>
+
+  <button
+    onclick="downloadPDF()"
+    class="pdf-btn"
+  >
+
+    Descargar PDF
+
+  </button>
+
+</section>
+
+  <section class="cards">
+    <div class="card">
+      <h3>Total recomendaciones</h3>
+      <p id="totalRecs">0</p>
+    </div>
+    <div class="card">
+      <h3>Avance promedio</h3>
+      <p id="avgProgress">0%</p>
+    </div>
+    <div class="card">
+      <h3>Abiertas</h3>
+      <p id="openCount">0</p>
+    </div>
+    <div class="card">
+      <h3>Cerradas</h3>
+      <p id="closedCount">0</p>
+    </div>
+  </section>
+
+  <section class="charts">
+    <div class="chart-box">
+      <canvas id="categoryChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <canvas id="progressChart"></canvas>
+    </div>
+  </section>
+
+<section class="table-container">
+
+  <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Recomendación</th>
+          <th>Expediente</th>
+          <th>Categoría</th>
+          <th>Estatus</th>
+          <th>Avance</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <script>
+    const SUPABASE_URL = 'https://djsipxjhqzqtxmmokhha.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_eBDbYLlXGscD7Pw6hUAqZA_zcf0xTlf';
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let allData = [];
+    let categoryChart;
+    let progressChart;
+
+async function downloadPDF(){
+
+  const { jsPDF } = window.jspdf
+
+  const doc = new jsPDF({
+
+    orientation:'portrait',
+    unit:'mm',
+    format:'a4'
+
+  })
+
+  const guinda = [123,30,43]
+  const dorado = [165,127,44]
+
+  // HEADER
+
+  doc.setFillColor(...guinda)
+
+  doc.rect(
+
+    0,
+    0,
+    210,
+    20,
+    'F'
+
+  )
+
+  doc.setTextColor(255)
+
+  doc.setFontSize(18)
+
+  doc.text(
+
+    'Secretaría de Infraestructura, Comunicaciones y Transportes',
+
+    15,
+
+    13
+
+  )
+
+
+  // SUBTITULO
+
+  doc.setTextColor(60)
+
+  doc.setFontSize(10)
+
+  doc.text(
+
+    'Dirección de Análisis de Accidentes e Incidentes de Aviación',
+
+    15,
+
+    30
+
+  )
+
+  // FECHA
+
+  const fecha = new Date()
+
+  doc.text(
+
+    `Fecha: ${fecha.toLocaleDateString()}`,
+
+    150,
+
+    30
+
+  )
+
+  // LINEA
+
+  doc.setDrawColor(...dorado)
+
+  doc.line(
+
+    15,
+
+    35,
+
+    195,
+
+    35
+
+  )
+
+
+  // RESUMEN
+
+  doc.setFontSize(12)
+
+  doc.setTextColor(40)
+
+  doc.text(
+
+    'Resumen',
+
+    15,
+
+    48
+
+  )
+
+  doc.setFontSize(9)
+
+  doc.text(
+
+    'El presente reporte muestra el estado actual de las recomendaciones emitidas por la DAAIA, incluyendo métricas de seguimiento y avance.',
+
+    15,
+
+    55,
+
+    {
+
+      maxWidth:180
+
+    }
+
+  )
+
+
+  // KPI
+
+  const avg =
+
+    allData.reduce((acc,x)=>{
+
+      const val = parseFloat(
+
+        String(x['%avance'] || '0')
+
+          .replace('%','')
+          .trim()
+
+      )
+
+      return acc + val
+
+    },0) / allData.length
+
+  const open = allData.filter(x => {
+
+    const avance = parseFloat(
+
+      String(x['%avance'] || '0')
+
+        .replace('%','')
+        .trim()
+
+    )
+
+    return avance < 100
+
+  }).length
+
+  const closed = allData.filter(x => {
+
+    const avance = parseFloat(
+
+      String(x['%avance'] || '0')
+
+        .replace('%','')
+        .trim()
+
+    )
+
+    return avance >= 100
+
+  }).length
+
+  doc.setTextColor(...guinda)
+
+  doc.setFontSize(11)
+
+  doc.text(
+
+    `Total: ${allData.length}`,
+
+    15,
+
+    75
+
+  )
+
+  doc.text(
+
+    `Avance promedio: ${avg.toFixed(0)}%`,
+
+    60,
+
+    75
+
+  )
+
+  doc.text(
+
+    `Abiertas: ${open}`,
+
+    125,
+
+    75
+
+  )
+
+  doc.text(
+
+    `Cerradas: ${closed}`,
+
+    165,
+
+    75
+
+  )
+
+
+  // TABLA POR AÑO
+
+  let y = 95
+
+  doc.setFillColor(...guinda)
+
+  doc.rect(
+
+    15,
+
+    y,
+
+    180,
+
+    8,
+
+    'F'
+
+  )
+
+  doc.setTextColor(255)
+
+  doc.setFontSize(9)
+
+  doc.text('Año',20,y+5)
+  doc.text('Total',50,y+5)
+  doc.text('Abiertas',80,y+5)
+  doc.text('Cerradas',120,y+5)
+  doc.text('Avance',165,y+5)
+
+  y += 12
+
+  const yearlyData = {}
+
+  allData.forEach(row => {
+
+    const year = row.anio || 'N/A'
+
+    const avance = parseFloat(
+
+      String(row['%avance'] || '0')
+
+        .replace('%','')
+        .trim()
+
+    )
+
+    if(!yearlyData[year]){
+
+      yearlyData[year] = {
+
+        total:0,
+        abiertas:0,
+        cerradas:0,
+        avance:0
+
+      }
+    }
+
+    yearlyData[year].total++
+
+    yearlyData[year].avance += avance
+
+    if(avance >= 100){
+
+      yearlyData[year].cerradas++
+
+    } else {
+
+      yearlyData[year].abiertas++
+    }
+  })
+
+  Object.keys(yearlyData)
+
+    .sort()
+
+    .forEach(year => {
+
+      const item = yearlyData[year]
+
+      const avgYear =
+
+        item.avance / item.total
+
+      doc.setTextColor(50)
+
+      doc.setFontSize(8)
+
+      doc.text(String(year),20,y)
+      doc.text(String(item.total),52,y)
+      doc.text(String(item.abiertas),87,y)
+      doc.text(String(item.cerradas),130,y)
+      doc.text(avgYear.toFixed(0)+'%',168,y)
+
+      y += 8
+    })
+
+
+  // CATEGORIAS
+
+
+  y += 12
+
+  doc.setTextColor(...guinda)
+
+  doc.setFontSize(11)
+
+  doc.text(
+
+    'Principales Categorías',
+
+    15,
+
+    y
+
+  )
+
+  y += 10
+
+  const categoryCounts = {}
+
+  allData.forEach(row => {
+
+    const cat = row.CATEGORIA || 'N/A'
+
+    categoryCounts[cat] =
+
+      (categoryCounts[cat] || 0)
+
+      + 1
+  })
+
+  doc.setFillColor(...guinda)
+
+  doc.rect(
+
+    15,
+
+    y,
+
+    180,
+
+    8,
+
+    'F'
+
+  )
+
+  doc.setTextColor(255)
+
+  doc.setFontSize(9)
+
+  doc.text(
+
+    'Categoría',
+
+    20,
+
+    y+5
+
+  )
+
+  doc.text(
+
+    'Total',
+
+    170,
+
+    y+5
+
+  )
+
+  y += 12
+
+  Object.entries(categoryCounts)
+
+    .sort((a,b)=>b[1]-a[1])
+
+    .slice(0,5)
+
+    .forEach(cat => {
+
+      doc.setTextColor(60)
+
+      doc.setFontSize(8)
+
+      doc.text(
+
+        String(cat[0]).substring(0,55),
+
+        20,
+
+        y
+
+      )
+
+      doc.text(
+
+        String(cat[1]),
+
+        172,
+
+        y
+
+      )
+
+      y += 8
+    })
+
+
+  // FOOTER
+
+  doc.setFillColor(...guinda)
+
+  doc.rect(
+
+    0,
+
+    287,
+
+    210,
+
+    10,
+
+    'F'
+
+  )
+
+  doc.setTextColor(255)
+
+  doc.setFontSize(8)
+
+  doc.text(
+
+    'Notas, comentarios, etc...',
+
+    15,
+
+    293
+
+  )
+
+  // DESCARGAR
+
+  doc.save(
+
+    'Reporte_DAAIA.pdf'
+
+  )
+}
+    async function loadData() {
+      const { data, error } = await client
+        .from('DAIAA')
+        .select('*');
+
+      if (error) {
+        console.error(error);
+        alert('Error cargando datos');
+        return;
+      }
+
+      allData = data || [];
+      fillFilters();
+      updateDashboard(allData);
+    }
+
+    function fillFilters() {
+      // Filtrar años válidos y ordenar de mayor a menor
+      const years = [...new Set(allData.map(x => x.anio).filter(Boolean))].sort((a, b) => b - a);
+      // Filtrar categorías válidas y ordenar alfabéticamente
+      const categories = [...new Set(allData.map(x => x.CATEGORIA).filter(Boolean))].sort();
+
+      const yearFilter = document.getElementById('yearFilter');
+      const categoryFilter = document.getElementById('categoryFilter');
+
+      years.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearFilter.appendChild(option);
+      });
+
+      categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        categoryFilter.appendChild(option);
+      });
+    }
+
+    function applyFilters() {
+      const year = document.getElementById('yearFilter').value;
+      const category = document.getElementById('categoryFilter').value;
+
+      let filtered = [...allData];
+
+      if (year) {
+        filtered = filtered.filter(x => x.anio == year);
+      }
+
+      if (category) {
+        filtered = filtered.filter(x => x.CATEGORIA == category);
+      }
+
+      updateDashboard(filtered);
+    }
+
+    function updateDashboard(data) {
+      document.getElementById('totalRecs').textContent = data.length;
+
+      // Calcular promedio previniendo división por cero si la data filtrada está vacía
+      let avg = 0;
+      if (data.length > 0) {
+        avg = data.reduce((acc, x) => {
+          const val = String(x['%avance'] || '').replace('%', '').trim();
+          return acc + (val ? Number(val) : 0);
+        }, 0) / data.length;
+      }
+
+      document.getElementById('avgProgress').textContent = avg.toFixed(0) + '%';
+
+      // Filtrado por estatus
+const open = data.filter(x => {
+
+  const avance = parseFloat(
+    String(x['%avance'] || '0')
+      .replace('%', '')
+      .trim()
+  );
+
+  return avance < 100;
+
+}).length;
+
+const closed = data.filter(x => {
+
+  const avance = parseFloat(
+    String(x['%avance'] || '0')
+      .replace('%', '')
+      .trim()
+  );
+
+  return avance >= 100;
+
+}).length;
+      document.getElementById('openCount').textContent = open;
+      document.getElementById('closedCount').textContent = closed;
+
+      renderTable(data);
+      renderCharts(data, avg);
+    }
+
+    function renderTable(data) {
+      const tbody = document.querySelector('#dataTable tbody');
+      let htmlRows = '';
+
+      // Optimización: Concatenar todo el HTML en un solo paso para evitar redibujados innecesarios del DOM
+      data.forEach(row => {
+        htmlRows += `
+          <tr>
+            <td>${row.num_recomendacion || ''}</td>
+            <td>${row.num_expediente || ''}</td>
+            <td>${row.CATEGORIA || ''}</td>
+            <td>${row.estatus || ''}</td>
+            <td>${row['%avance'] || ''}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = htmlRows;
+    }
+
+    function renderCharts(data, avg) {
+      // 1. Procesar datos para Gráfica de Barras por Categoría
+      const categoryCounts = {};
+      data.forEach(row => {
+        if (row.CATEGORIA) {
+          categoryCounts[row.CATEGORIA] = (categoryCounts[row.CATEGORIA] || 0) + 1;
+        }
+      });
+
+      const labels = Object.keys(categoryCounts);
+      const values = Object.values(categoryCounts);
+
+      if (categoryChart) {
+        categoryChart.destroy();
+      }
+
+      categoryChart = new Chart(document.getElementById('categoryChart'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Recomendaciones por Categoría',
+            data: values,
+            backgroundColor: '#7b1e2b'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      // 2. Gráfica Avance Promedio
+      if (progressChart) {
+        progressChart.destroy();
+      }
+
+      progressChart = new Chart(document.getElementById('progressChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Avance', 'Pendiente'],
+datasets:[{
+
+  data:[
+    avg,
+    100 - avg
+  ],
+
+  backgroundColor:[
+    '#A57F2C',
+    '#D9D9D9'
+  ]
+
+}]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    // Listeners para los elementos select
+    document.getElementById('yearFilter').addEventListener('change', applyFilters);
+    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+
+    // Inicializar carga de datos de Supabase
+    loadData();
+  </script>
+
+</body>
+</html>
