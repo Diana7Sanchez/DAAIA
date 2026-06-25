@@ -493,47 +493,65 @@ const logoBase64 = canvasLogo.toDataURL("image/png");
     const guinda = [123, 30, 43];
     const dorado = [165, 127, 44];
 
-doc.setFillColor(...guinda);
-doc.rect(0, 0, 210, 20, 'F');
+// Fondo blanco
+doc.setFillColor(255,255,255);
+doc.rect(0,0,210,30,"F");
 
 // Logo
 doc.addImage(
     logoBase64,
     "PNG",
-    170,
-    2,
-    30,
+    158,      // más a la izquierda
+    4,
+    42,       // más grande
+    16
+);
+
+// Título institucional
+doc.setTextColor(...guinda);
+doc.setFont("helvetica","bold");
+doc.setFontSize(18);
+
+doc.text(
+    "Secretaría de Infraestructura, Comunicaciones y Transportes",
+    15,
     15
 );
 
-// Texto
-doc.setTextColor(255);
-doc.setFontSize(14);
+// Dirección
+doc.setFont("helvetica","normal");
+doc.setFontSize(11);
+
 doc.text(
-    'Secretaría de Infraestructura, Comunicaciones y Transportes',
+    "Dirección de Análisis de Accidentes e Incidentes de Aviación",
     15,
-    13
+    23
 );
 
-    doc.setTextColor(60);
-    doc.setFontSize(10);
-    doc.text('Dirección de Análisis de Accidentes e Incidentes de Aviación', 15, 30);
+// Línea dorada
+doc.setDrawColor(...dorado);
+doc.setLineWidth(0.6);
+doc.line(15,28,195,28);
 
-    const fecha = new Date();
-    doc.text(`Fecha: ${fecha.toLocaleDateString()}`, 150, 30);
+const fecha = new Date();
 
-    doc.setDrawColor(...dorado);
-    doc.line(15, 35, 195, 35);
+doc.setFontSize(10);
+doc.setTextColor(70);
 
+doc.text(
+    `Fecha: ${fecha.toLocaleDateString()}`,
+    150,
+    35
+);
     doc.setFontSize(12);
     doc.setTextColor(40);
-    doc.text('Resumen Informativo', 15, 48);
+    doc.text('Resumen Informativo', 15, 58);
 
     doc.setFontSize(9);
     doc.text(
       'El presente reporte muestra el estado actual filtrado de las recomendaciones emitidas por la DAAIA, incluyendo métricas de seguimiento y avance correspondientes al criterio seleccionado.',
       15,
-      55,
+      65,
       { maxWidth: 180 }
     );
 
