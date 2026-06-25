@@ -501,16 +501,16 @@ doc.rect(0,0,210,30,"F");
 doc.addImage(
     logoBase64,
     "PNG",
-    158,      // más a la izquierda
-    4,
-    42,       // más grande
-    16
+    170,
+    5,
+    25,
+    11
 );
 
 // Título institucional
 doc.setTextColor(...guinda);
 doc.setFont("helvetica","bold");
-doc.setFontSize(18);
+doc.setFontSize(16);
 
 doc.text(
     "Secretaría de Infraestructura, Comunicaciones y Transportes",
@@ -539,19 +539,19 @@ doc.setFontSize(10);
 doc.setTextColor(70);
 
 doc.text(
-    `Fecha: ${fecha.toLocaleDateString()}`,
-    150,
-    35
+    `Fecha de emisión: ${fecha.toLocaleDateString()}`,
+    145,
+    32
 );
     doc.setFontSize(12);
     doc.setTextColor(40);
-    doc.text('Resumen Informativo', 15, 58);
+    doc.text('Resumen Informativo', 15, 42);
 
     doc.setFontSize(9);
     doc.text(
-      'El presente reporte muestra el estado actual de las recomendaciones emitidas por la DAAIA, incluyendo métricas de seguimiento y avance en el estatus de dichas recomendaciones.',
+      'El presente reporte muestra el estado actual de las recomendaciones emitidas por la Dirección de Análisis de Accidentes e Incidentes de Aviación (DAAIA), incluyendo métricas de seguimiento y avance en el estatus de dichas recomendaciones.',
       15,
-      65,
+      48,
       { maxWidth: 180 }
     );
 
@@ -572,10 +572,10 @@ doc.text(
 
     doc.setTextColor(...guinda);
     doc.setFontSize(11);
-    doc.text(`Total: ${currentReportData.length}`, 15, 75);
-    doc.text(`Avance promedio: ${avg.toFixed(0)}%`, 60, 75);
-    doc.text(`Abiertas: ${open}`, 125, 75);
-    doc.text(`Cerradas: ${closed}`, 165, 75);
+    doc.text(`Total: ${currentReportData.length}`, 15, 60);
+    doc.text(`Avance promedio: ${avg.toFixed(0)}%`, 60, 60);
+    doc.text(`Abiertas: ${open}`, 125, 60);
+    doc.text(`Cerradas: ${closed}`, 165, 60);
 
     let y = 95;
     doc.setFillColor(...guinda);
