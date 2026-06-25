@@ -501,10 +501,10 @@ doc.rect(0,0,210,30,"F");
 doc.addImage(
     logoBase64,
     "PNG",
-    170,
-    5,
-    25,
-    11
+    160,   // más a la izquierda
+    8,     // un poco más abajo
+    35,    // ancho
+    13     // alto
 );
 
 // Título institucional
@@ -538,20 +538,16 @@ const fecha = new Date();
 doc.setFontSize(10);
 doc.setTextColor(70);
 
-doc.text(
-    `Fecha de emisión: ${fecha.toLocaleDateString()}`,
-    145,
-    32
-);
+doc.text(`Fecha de emisión: ${fecha.toLocaleDateString()}`,145,33);
     doc.setFontSize(12);
     doc.setTextColor(40);
-    doc.text('Resumen Informativo', 15, 42);
+    doc.text('Resumen Informativo', 15, 40);
 
     doc.setFontSize(9);
     doc.text(
       'El presente reporte muestra el estado actual de las recomendaciones emitidas por la Dirección de Análisis de Accidentes e Incidentes de Aviación (DAAIA), incluyendo métricas de seguimiento y avance en el estatus de dichas recomendaciones.',
       15,
-      48,
+      46,
       { maxWidth: 180 }
     );
 
@@ -577,7 +573,7 @@ doc.text(
     doc.text(`Abiertas: ${open}`, 125, 60);
     doc.text(`Cerradas: ${closed}`, 165, 60);
 
-    let y = 95;
+    let y = 70;
     doc.setFillColor(...guinda);
     doc.rect(15, y, 180, 8, 'F');
 
