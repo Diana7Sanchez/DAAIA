@@ -630,6 +630,9 @@ doc.addImage(
 doc.setTextColor(...guinda);
 doc.setFont("helvetica","bold");
 doc.setFontSize(16);
+// Secretaría
+doc.setFont("helvetica","bold");
+doc.setFontSize(16);
 
 doc.text(
     "Secretaría de Infraestructura, Comunicaciones y Transportes",
@@ -637,20 +640,27 @@ doc.text(
     15
 );
 
-// Dirección
+// Subsecretaría
 doc.setFont("helvetica","normal");
 doc.setFontSize(11);
 
 doc.text(
-    "Dirección de Análisis de Accidentes e Incidentes de Aviación",
+    "Subsecretaría de Comunicaciones y Transportes",
     15,
-    23
+    22
 );
 
-// Línea
+// Dirección
+doc.text(
+    "Dirección de Análisis de Accidentes e Incidentes de Aviación",
+    15,
+    28
+);
+
+// Línea institucional
 doc.setDrawColor(...dorado);
 doc.setLineWidth(0.6);
-doc.line(15,28,195,28);
+doc.line(15,33,195,33);
 
 // Fecha
 doc.setFontSize(10);
@@ -659,7 +669,7 @@ doc.setTextColor(70);
 doc.text(
     `Fecha de emisión: ${fecha.toLocaleDateString()}`,
     145,
-    33
+    38
 );
 
 // ===============================
@@ -669,14 +679,14 @@ doc.text(
 doc.setFontSize(12);
 doc.setTextColor(40);
 
-doc.text("Resumen Informativo", 15, 40);
+doc.text("Resumen Informativo", 15, 45);
 
 doc.setFontSize(9);
 
 doc.text(
     "El presente reporte muestra el estado actual de las recomendaciones emitidas por la Dirección de Análisis de Accidentes e Incidentes de Aviación (DAAIA), incluyendo métricas de seguimiento y avance en el estatus de dichas recomendaciones.",
     15,
-    48,
+    51,
     { maxWidth: 180 }
 );
 
@@ -708,13 +718,13 @@ const info = currentReportData.filter(x =>
 doc.setTextColor(...guinda);
 doc.setFontSize(11);
 
-doc.text(`Total: ${currentReportData.length}`, 15, 64);
-doc.text(`Avance: ${avg.toFixed(0)}%`, 55, 64);
-doc.text(`Abiertas: ${open}`, 95, 64);
-doc.text(`Cerradas: ${closed}`, 135, 64);
-doc.text(`Informativas: ${info}`, 172, 64);
+doc.text(`Total: ${currentReportData.length}`, 15, 63);
+doc.text(`Avance: ${avg.toFixed(0)}%`, 55, 63);
+doc.text(`Abiertas: ${open}`, 95, 63);
+doc.text(`Cerradas: ${closed}`, 135, 63);
+doc.text(`Informativas: ${info}`, 170, 63);
 
-let y = 74;
+let y = 73;
     doc.setFillColor(...guinda);
     doc.rect(15, y, 180, 8, 'F');
 
