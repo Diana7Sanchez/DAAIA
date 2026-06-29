@@ -161,6 +161,50 @@ tr:hover {
   background: #f9f9f9;
 }
 
+.status-badge{
+display:inline-block;
+padding:5px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+color:white;
+text-align:center;
+min-width:95px;
+}
+
+.status-badge.ABIERTA{
+background:#E67E22;
+}
+
+.status-badge.CERRADA{
+background:#27AE60;
+}
+
+.status-badge.INFORMATIVA{
+background:#2980B9;
+}
+
+.progress-cell{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:6px;
+}
+
+.progress-bar{
+width:90px;
+height:8px;
+background:#ddd;
+border-radius:20px;
+overflow:hidden;
+}
+
+.progress-fill{
+height:100%;
+background:#7b1e2b;
+border-radius:20px;
+transition:.4s;
+}
 /* =========================================================
    TOOLTIP
 ========================================================= */
@@ -278,6 +322,31 @@ tr:hover {
 /* =========================================================
    RESPONSIVE
 ========================================================= */
+.table-toolbar{
+
+display:flex;
+gap:15px;
+margin-bottom:15px;
+flex-wrap:wrap;
+align-items:center;
+
+}
+
+.table-toolbar input{
+
+padding:10px;
+width:320px;
+border:1px solid #ccc;
+border-radius:6px;
+
+}
+
+.table-toolbar select{
+
+padding:10px;
+border-radius:6px;
+
+}
 
 @media(max-width:1000px){
 
@@ -393,6 +462,10 @@ tr:hover {
     <h3>Cerradas</h3>
     <p id="closedCount">0</p>
   </div>
+  <div class="card">
+  <h3>Informativas</h3>
+  <p id="infoCount">0</p>
+</div>
 </section>
 
 <section class="charts">
@@ -415,15 +488,53 @@ tr:hover {
 
 </section>
 
+<div class="table-toolbar">
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="🔎 Buscar recomendación, expediente, categoría..."
+        onkeyup="applyFilters()">
+
+    <select id="statusFilter" onchange="applyFilters()">
+        <option value="">Todos los estatus</option>
+        <option>ABIERTA</option>
+        <option>CERRADA</option>
+        <option>INFORMATIVA</option>
+    </select>
+
+    <select id="rowsPerPage" onchange="applyFilters()">
+        <option value="10">10 registros</option>
+        <option value="25" selected>25 registros</option>
+        <option value="50">50 registros</option>
+        <option value="100">100 registros</option>
+        <option value="99999">Todos</option>
+    </select>
+
+</div>
 <section class="table-container">
   <table id="dataTable">
     <thead>
       <tr>
-        <th>Recomendación</th>
-        <th>Expediente</th>
-        <th>Categoría</th>
-        <th>Estatus</th>
-        <th>Avance</th>
+       <th onclick="sortBy('num_recomendacion')">
+Recomendación ↕
+</th>
+
+<th onclick="sortBy('num_expediente')">
+Expediente ↕
+</th>
+
+<th onclick="sortBy('CATEGORIA')">
+Categoría ↕
+</th>
+
+<th onclick="sortBy('estatus')">
+Estatus ↕
+</th>
+
+<th onclick="sortBy('%avance')">
+Avance ↕
+</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -442,6 +553,10 @@ tr:hover {
   let destinatarioChart;
   let operadoresChart;
 
+  let currentSort = "num_recomendacion";
+let ascending = true;
+
+let currentPage = 1;
   function getFilteredData() {
     const year = document.getElementById('yearFilter').value;
     const category = document.getElementById('categoryFilter').value;
@@ -556,22 +671,31 @@ doc.text(`Fecha de emisión: ${fecha.toLocaleDateString()}`,145,33);
       return acc + val;
     }, 0) / currentReportData.length;
 
-    const open = currentReportData.filter(x => {
-      const avance = parseFloat(String(x['%avance'] || '0').replace('%', '').trim());
-      return avance < 100;
-    }).length;
+  const open = currentReportData.filter(x =>
+    String(x.estatus || "")
+      .trim()
+      .toUpperCase() === "ABIERTA"
+).length;
 
-    const closed = currentReportData.filter(x => {
-      const avance = parseFloat(String(x['%avance'] || '0').replace('%', '').trim());
-      return avance >= 100;
-    }).length;
+const closed = currentReportData.filter(x =>
+    String(x.estatus || "")
+      .trim()
+      .toUpperCase() === "CERRADA"
+).length;
+
+const info = currentReportData.filter(x =>
+    String(x.estatus || "")
+      .trim()
+      .toUpperCase() === "INFORMATIVA"
+).length;
 
     doc.setTextColor(...guinda);
     doc.setFontSize(11);
     doc.text(`Total: ${currentReportData.length}`, 15, 60);
     doc.text(`Avance promedio: ${avg.toFixed(0)}%`, 60, 60);
-    doc.text(`Abiertas: ${open}`, 125, 60);
-    doc.text(`Cerradas: ${closed}`, 165, 60);
+    doc.text(`Abiertas: ${open}`, 110, 60);
+doc.text(`Cerradas: ${closed}`, 145, 60);
+doc.text(`Informativas: ${info}`, 175, 60);
 
     let y = 70;
     doc.setFillColor(...guinda);
@@ -599,11 +723,29 @@ doc.text(`Fecha de emisión: ${fecha.toLocaleDateString()}`,145,33);
       yearlyData[year].total++;
       yearlyData[year].avance += avance;
 
-      if (avance >= 100) {
-        yearlyData[year].cerradas++;
-      } else {
-        yearlyData[year].abiertas++;
-      }
+     const estatus = String(row.estatus || "")
+    .trim()
+    .toUpperCase();
+
+if (!yearlyData[year]) {
+    yearlyData[year] = {
+        total: 0,
+        abiertas: 0,
+        cerradas: 0,
+        informativas: 0,
+        avance: 0
+    };
+}
+
+if (estatus === "ABIERTA") {
+    yearlyData[year].abiertas++;
+}
+else if (estatus === "CERRADA") {
+    yearlyData[year].cerradas++;
+}
+else if (estatus === "INFORMATIVA") {
+    yearlyData[year].informativas++;
+}
     });
 
     Object.keys(yearlyData).sort().forEach(year => {
@@ -814,9 +956,84 @@ function fillFilters() {
 
 function applyFilters() {
 
-  const filtered = getFilteredData();
+    let filtered = getFilteredData();
 
-  updateDashboard(filtered);
+    // Buscar
+    const texto = document.getElementById("searchInput").value.toUpperCase();
+
+    if(texto){
+
+        filtered = filtered.filter(row=>{
+
+            return Object.values(row).join(" ")
+                .toUpperCase()
+                .includes(texto);
+
+        });
+
+    }
+
+    // Estatus
+    const status = document.getElementById("statusFilter").value;
+
+    if(status){
+
+        filtered = filtered.filter(x=>
+
+            String(x.estatus)
+            .toUpperCase()
+            === status
+
+        );
+
+    }
+
+    // Orden
+
+    filtered.sort((a,b)=>{
+
+        let A = a[currentSort] ?? "";
+        let B = b[currentSort] ?? "";
+
+        if(currentSort=="%avance"){
+
+            A=parseFloat(String(A).replace("%",""))||0;
+            B=parseFloat(String(B).replace("%",""))||0;
+
+        }
+
+        else{
+
+            A=String(A).toUpperCase();
+            B=String(B).toUpperCase();
+
+        }
+
+        if(A<B) return ascending?-1:1;
+        if(A>B) return ascending?1:-1;
+
+        return 0;
+
+    });
+
+    updateDashboard(filtered);
+
+}
+function sortBy(field){
+
+    if(currentSort===field){
+
+        ascending=!ascending;
+
+    }else{
+
+        currentSort=field;
+
+        ascending=true;
+
+    }
+
+    applyFilters();
 
 }
 
@@ -870,35 +1087,27 @@ function updateDashboard(data) {
   document.getElementById('avgProgress')
     .textContent = avg.toFixed(0) + '%';
 
-  const open = data.filter(x => {
-
-    const avance = parseFloat(
-      String(x['%avance'] || '0')
-      .replace('%', '')
+const open = data.filter(x =>
+    String(x.estatus || "")
       .trim()
-    );
+      .toUpperCase() === "ABIERTA"
+).length;
 
-    return avance < 100;
-
-  }).length;
-
-  const closed = data.filter(x => {
-
-    const avance = parseFloat(
-      String(x['%avance'] || '0')
-      .replace('%', '')
+const closed = data.filter(x =>
+    String(x.estatus || "")
       .trim()
-    );
+      .toUpperCase() === "CERRADA"
+).length;
 
-    return avance >= 100;
+const info = data.filter(x =>
+    String(x.estatus || "")
+      .trim()
+      .toUpperCase() === "INFORMATIVA"
+).length;
 
-  }).length;
-
-  document.getElementById('openCount')
-    .textContent = open;
-
-  document.getElementById('closedCount')
-    .textContent = closed;
+document.getElementById('openCount').textContent = open;
+document.getElementById('closedCount').textContent = closed;
+document.getElementById('infoCount').textContent = info;
 
   renderTable(data);
 
@@ -906,77 +1115,183 @@ function updateDashboard(data) {
 renderDestinatariosChart(data);
 }
 function renderTable(data) {
-  const tbody = document.querySelector('#dataTable tbody');
-  let htmlRows = '';
 
-  // 1. Ordenamos los datos para que coincida pantalla y Tooltip
-  const sortedData = [...data].sort((a, b) => {
-    return String(a.num_recomendacion).localeCompare(String(b.num_recomendacion), undefined, { numeric: true, sensitivity: 'base' });
-  });
+    const tbody = document.querySelector('#dataTable tbody');
+    let htmlRows = '';
 
-  sortedData.forEach(row => {
-    // Obtener todas las llaves reales del objeto devuelto por Supabase
-    const keys = Object.keys(row);
+    // Cantidad de registros a mostrar
+    const rows = Number(
+        document.getElementById("rowsPerPage").value
+    );
 
-    // 2. Buscamos las columnas de forma dinámica por aproximación de texto
-    const keyOficio = keys.find(k => k.toLowerCase().includes('emisin_oficio'));
-const keyTecnica = keys.find(k =>
-  k.toLowerCase().includes('evalua')
-);
-    const keyControl = keys.find(k => k.toLowerCase().includes('registro_control'));
-    const keyEvidencia = keys.find(k => k.toLowerCase().includes('envioderespuesta_evidencia'));
+    const sortedData =
+        rows === 99999
+            ? data
+            : data.slice(0, rows);
 
-    // 3. Asignamos los valores reales encontrados dinámicamente
-    const rControl = formatStage(keyControl ? row[keyControl] : "0%");
-    const rOficio = formatStage(keyOficio ? row[keyOficio] : "0%");
-    const rEvidencia = formatStage(keyEvidencia ? row[keyEvidencia] : "0%");
-    const rEvTecnica = formatStage(keyTecnica ? row[keyTecnica] : "0%");
-    const rSeguimiento = formatStage(row["seguimiento"] || "0%");
-    const rEstFinal = formatStage(row["estatus_final"] || row["estado_final"] || "0%");
+    sortedData.forEach(row => {
 
-    htmlRows += `
-      <tr>
-        <td>${row.num_recomendacion || ''}</td>
-        <td>${row.num_expediente || ''}</td>
-        <td>${row.CATEGORIA || ''}</td>
-        <td>${row.estatus || ''}</td>
-        <td>
-          <div class="tooltip-container">
-            ${row['%avance'] || '0%'}
-            <div class="tooltip-box">
-              <div class="tooltip-row">
-                <span class="tooltip-label">REGISTRO Y CONTROL:</span>
-                <span class="tooltip-value">${rControl}</span>
-              </div>
-              <div class="tooltip-row">
-                <span class="tooltip-label">EMISIÓN OFICIO:</span>
-                <span class="tooltip-value">${rOficio}</span>
-              </div>
-              <div class="tooltip-row">
-                <span class="tooltip-label">RESPUESTA EVIDENCIA:</span>
-                <span class="tooltip-value">${rEvidencia}</span>
-              </div>
-              <div class="tooltip-row">
-                <span class="tooltip-label">EVALUACIÓN TÉCNICA:</span>
-                <span class="tooltip-value">${rEvTecnica}</span>
-              </div>
-              <div class="tooltip-row">
-                <span class="tooltip-label">SEGUIMIENTO:</span>
-                <span class="tooltip-value">${rSeguimiento}</span>
-              </div>
-              <div class="tooltip-row">
-                <span class="tooltip-label">ESTADO FINAL:</span>
-                <span class="tooltip-value">${rEstFinal}</span>
-              </div>
+        // Obtener nombres reales de columnas
+        const keys = Object.keys(row);
+
+        const keyOficio = keys.find(k =>
+            k.toLowerCase().includes("emisin_oficio")
+        );
+
+        const keyTecnica = keys.find(k =>
+            k.toLowerCase().includes("evalua")
+        );
+
+        const keyControl = keys.find(k =>
+            k.toLowerCase().includes("registro_control")
+        );
+
+        const keyEvidencia = keys.find(k =>
+            k.toLowerCase().includes("envioderespuesta_evidencia")
+        );
+
+        // Valores para tooltip
+        const rControl = formatStage(
+            keyControl ? row[keyControl] : "0%"
+        );
+
+        const rOficio = formatStage(
+            keyOficio ? row[keyOficio] : "0%"
+        );
+
+        const rEvidencia = formatStage(
+            keyEvidencia ? row[keyEvidencia] : "0%"
+        );
+
+        const rEvTecnica = formatStage(
+            keyTecnica ? row[keyTecnica] : "0%"
+        );
+
+        const rSeguimiento = formatStage(
+            row["seguimiento"] || "0%"
+        );
+
+        const rEstFinal = formatStage(
+            row["estatus_final"] ||
+            row["estado_final"] ||
+            "0%"
+        );
+
+        const avance =
+            parseFloat(
+                String(row["%avance"] || "0")
+                    .replace("%","")
+            ) || 0;
+
+        htmlRows += `
+
+<tr>
+
+<td>${row.num_recomendacion || ''}</td>
+
+<td>${row.num_expediente || ''}</td>
+
+<td>${row.CATEGORIA || ''}</td>
+
+<td>
+
+<span class="status-badge ${String(row.estatus || '').toUpperCase()}">
+
+${row.estatus || ''}
+
+</span>
+
+</td>
+
+<td>
+
+<div class="tooltip-container">
+
+    <!-- Barra de avance -->
+    <div class="progress-cell">
+
+        <div class="progress-bar">
+            <div class="progress-fill"
+                 style="width:${avance}%">
             </div>
-          </div>
-        </td>
-      </tr>
-    `;
-  });
+        </div>
 
-  tbody.innerHTML = htmlRows;
+        <span>${avance}%</span>
+
+    </div>
+
+<div class="tooltip-box">
+
+<div class="tooltip-row">
+<span class="tooltip-label">
+REGISTRO Y CONTROL:
+</span>
+<span class="tooltip-value">
+${rControl}
+</span>
+</div>
+
+<div class="tooltip-row">
+<span class="tooltip-label">
+EMISIÓN OFICIO:
+</span>
+<span class="tooltip-value">
+${rOficio}
+</span>
+</div>
+
+<div class="tooltip-row">
+<span class="tooltip-label">
+RESPUESTA EVIDENCIA:
+</span>
+<span class="tooltip-value">
+${rEvidencia}
+</span>
+</div>
+
+<div class="tooltip-row">
+<span class="tooltip-label">
+EVALUACIÓN TÉCNICA:
+</span>
+<span class="tooltip-value">
+${rEvTecnica}
+</span>
+</div>
+
+<div class="tooltip-row">
+<span class="tooltip-label">
+SEGUIMIENTO:
+</span>
+<span class="tooltip-value">
+${rSeguimiento}
+</span>
+</div>
+
+<div class="tooltip-row">
+<span class="tooltip-label">
+ESTADO FINAL:
+</span>
+<span class="tooltip-value">
+${rEstFinal}
+</span>
+</div>
+
+</div>
+
+</div>
+
+</td>
+
+</tr>
+
+`;
+
+    });
+
+    tbody.innerHTML = htmlRows;
+
 }
+
   function renderCharts(data, avg) {
     const categoryCounts = {};
     data.forEach(row => {
