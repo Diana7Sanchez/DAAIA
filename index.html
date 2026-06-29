@@ -23,9 +23,10 @@ body {
 .header {
   margin-bottom: 30px;
   background: white;
-  padding: 20px 30px;
+  padding: 20px 30px 70px 30px; 
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  overflow: visible;
 }
 
 .title-section {
@@ -44,7 +45,10 @@ body {
   width: 260px;
   height: auto;
   object-fit: contain;
-  margin-top: 18px;
+
+  position: relative;
+  top: 45px;      /* Baja el logo */
+  right: 0;
 }
 
 h1 {
@@ -692,11 +696,14 @@ const info = currentReportData.filter(x =>
 
     doc.setTextColor(...guinda);
     doc.setFontSize(11);
-    doc.text(`Total: ${currentReportData.length}`, 15, 60);
-    doc.text(`Avance promedio: ${avg.toFixed(0)}%`, 60, 60);
-    doc.text(`Abiertas: ${open}`, 110, 60);
-doc.text(`Cerradas: ${closed}`, 145, 60);
-doc.text(`Informativas: ${info}`, 175, 60);
+doc.setTextColor(...guinda);
+doc.setFontSize(11);
+
+doc.text(`Total: ${currentReportData.length}`, 15, 60);
+doc.text(`Avance promedio: ${avg.toFixed(0)}%`, 45, 60);
+doc.text(`Abiertas: ${open}`, 92, 60);
+doc.text(`Cerradas: ${closed}`, 128, 60);
+doc.text(`Informativas: ${info}`, 163, 60);
 
     let y = 70;
     doc.setFillColor(...guinda);
