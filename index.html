@@ -609,18 +609,21 @@ const logoBase64 = canvasLogo.toDataURL("image/png");
     const guinda = [123, 30, 43];
     const dorado = [165, 127, 44];
 
-// Fondo blanco
+// Fecha
+const fecha = new Date();
+
+// Fondo blanco (más alto)
 doc.setFillColor(255,255,255);
-doc.rect(0,0,210,30,"F");
+doc.rect(0,0,210,42,"F");
 
 // Logo
 doc.addImage(
     logoBase64,
     "PNG",
-    160,
-    15,
-    34,
-    13
+    160,   // izquierda / derecha
+    17,    // posición vertical
+    34,    // ancho
+    13     // alto
 );
 
 // Título institucional
@@ -634,15 +637,6 @@ doc.text(
     15
 );
 
-// Subse
-doc.setFont("helvetica","normal");
-doc.setFontSize(11);
-
-doc.text(
-    "Subsecretaría de Infraestructura, Comunicaciones y Transportes",
-    15,
-    23
-);
 // Dirección
 doc.setFont("helvetica","normal");
 doc.setFontSize(11);
@@ -650,31 +644,41 @@ doc.setFontSize(11);
 doc.text(
     "Dirección de Análisis de Accidentes e Incidentes de Aviación",
     15,
-    23
+    24
 );
 
-// Línea dorada
+// Línea institucional
 doc.setDrawColor(...dorado);
 doc.setLineWidth(0.6);
-doc.line(15,28,195,28);
+doc.line(15,36,195,36);
 
-const fecha = new Date();
-
+// Fecha
 doc.setFontSize(10);
 doc.setTextColor(70);
 
-doc.text(`Fecha de emisión: ${fecha.toLocaleDateString()}`,145,33);
-    doc.setFontSize(12);
-    doc.setTextColor(40);
-    doc.text('Resumen Informativo', 15, 40);
+doc.text(
+    `Fecha de emisión: ${fecha.toLocaleDateString()}`,
+    145,
+    36
+);
 
-    doc.setFontSize(9);
-    doc.text(
-      'El presente reporte muestra el estado actual de las recomendaciones emitidas por la Dirección de Análisis de Accidentes e Incidentes de Aviación (DAAIA), incluyendo métricas de seguimiento y avance en el estatus de dichas recomendaciones.',
-      15,
-      46,
-      { maxWidth: 180 }
-    );
+// ===============================
+// CONTENIDO
+// ===============================
+
+doc.setFontSize(12);
+doc.setTextColor(40);
+
+doc.text("Resumen Informativo", 15, 46);
+
+doc.setFontSize(9);
+
+doc.text(
+    "El presente reporte muestra el estado actual de las recomendaciones emitidas por la Dirección de Análisis de Accidentes e Incidentes de Aviación (DAAIA), incluyendo métricas de seguimiento y avance en el estatus de dichas recomendaciones.",
+    15,
+    52,
+    { maxWidth: 180 }
+);
 
     const avg = currentReportData.reduce((acc, x) => {
       const val = parseFloat(String(x['%avance'] || '0').replace('%', '').trim());
